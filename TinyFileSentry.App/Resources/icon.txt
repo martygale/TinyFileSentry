@@ -1,0 +1,2 @@
+Placeholder for application icon. 
+In production, this would be replaced with a proper .ico file.

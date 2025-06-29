@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Background circle -->
+  <circle cx="128" cy="128" r="120" fill="#2E5BBA" stroke="#1E3F7A" stroke-width="4"/>
+  
+  <!-- Shield shape - увеличенный до краёв окружности -->
+  <path d="M128 20 L215 55 L215 135 Q215 170 128 225 Q41 170 41 135 L41 55 Z" 
+        fill="#4A90E2" stroke="#2E5BBA" stroke-width="3"/>
+  
+  <!-- Document/File inside shield -->
+  <rect x="95" y="70" width="66" height="95" rx="5" fill="#FFFFFF" stroke="#E5E5E5" stroke-width="2"/>
+  
+  <!-- Document corner fold -->
+  <path d="M145 70 L161 70 L161 86 Z" fill="#E5E5E5"/>
+  <path d="M145 70 L161 86 L145 86 Z" fill="#F5F5F5"/>
+  
+  <!-- Document lines -->
+  <line x1="105" y1="95" x2="145" y2="95" stroke="#CCCCCC" stroke-width="2"/>
+  <line x1="105" y1="110" x2="153" y2="110" stroke="#CCCCCC" stroke-width="2"/>
+  <line x1="105" y1="125" x2="150" y2="125" stroke="#CCCCCC" stroke-width="2"/>
+  <line x1="105" y1="140" x2="153" y2="140" stroke="#CCCCCC" stroke-width="2"/>
+  <line x1="105" y1="155" x2="150" y2="155" stroke="#CCCCCC" stroke-width="2"/>
+  
+  <!-- Sync/monitoring arrows -->
+  <path d="M185 155 Q195 165 185 175 L190 170 M185 175 L180 170" 
+        fill="none" stroke="#2E5BBA" stroke-width="4" stroke-linecap="round"/>
+  <path d="M71 175 Q61 165 71 155 L66 160 M71 155 L76 160" 
+        fill="none" stroke="#2E5BBA" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Small status indicator dot -->
+  <circle cx="200" cy="80" r="10" fill="#52C41A" stroke="#FFFFFF" stroke-width="3"/>
+</svg>
