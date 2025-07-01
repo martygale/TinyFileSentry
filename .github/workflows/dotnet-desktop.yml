@@ -1,0 +1,59 @@
+name: TinyFileSentry Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: windows-latest
+
+    env:
+      Solution_Directory: TinyFileSentry
+      Test_Project_Path: TinyFileSentry.Tests/TinyFileSentry.Tests.csproj
+      App_Project_Path: TinyFileSentry.App/TinyFileSentry.App.csproj
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    # Install the .NET workload
+    - name: Install .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    # Restore dependencies
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # Build the solution
+    - name: Build solution
+      run: dotnet build --configuration ${{ matrix.configuration }} --no-restore
+
+    # Execute unit tests
+    - name: Run tests
+      run: dotnet test --configuration ${{ matrix.configuration }} --no-build --verbosity normal
+
+    # Publish the application (Release only)
+    - name: Publish application
+      if: matrix.configuration == 'Release'
+      run: dotnet publish $env:App_Project_Path -c Release -r win-x64 --self-contained -o ./publish
+      
+    # Upload published application
+    - name: Upload build artifacts
+      if: matrix.configuration == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: TinyFileSentry-win-x64
+        path: ./publish
