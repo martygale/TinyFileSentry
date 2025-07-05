@@ -6,13 +6,12 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+
 jobs:
 
   build:
-
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
 
     runs-on: windows-latest
 
@@ -39,21 +38,84 @@ jobs:
 
     # Build the solution
     - name: Build solution
-      run: dotnet build --configuration ${{ matrix.configuration }} --no-restore
+      run: dotnet build --configuration Release --no-restore
 
     # Execute unit tests
     - name: Run tests
-      run: dotnet test --configuration ${{ matrix.configuration }} --no-build --verbosity normal
+      run: dotnet test --configuration Release --no-build --verbosity normal
 
-    # Publish the application (Release only)
+    # Publish the application
     - name: Publish application
-      if: matrix.configuration == 'Release'
-      run: dotnet publish $env:App_Project_Path -c Release -r win-x64 --self-contained -o ./publish
-      
-    # Upload published application
-    - name: Upload build artifacts
-      if: matrix.configuration == 'Release'
-      uses: actions/upload-artifact@v4
+      run: dotnet publish $env:App_Project_Path -c Release -r win-x64 -o ./publish
+
+    # Install WiX v4 CLI
+    - name: Install WiX v4 CLI
+      run: |
+        dotnet tool install --global wix --version 4.0.5
+        wix --version
+
+    # Create MSI installer
+    - name: Create MSI installer
+      run: |
+        # Create WiX source file
+        $wxsContent = @"
+        <?xml version="1.0" encoding="UTF-8"?>
+        <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+          <Package Name="TinyFileSentry" Version="1.0.0" Manufacturer="TinyFileSentry" UpgradeCode="12345678-1234-1234-1234-123456789012">
+            <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+            <MediaTemplate EmbedCab="yes" />
+            
+            <Feature Id="ProductFeature" Title="TinyFileSentry" Level="1">
+              <ComponentGroupRef Id="ProductComponents" />
+            </Feature>
+          </Package>
+          
+          <Fragment>
+            <Directory Id="TARGETDIR" Name="SourceDir">
+              <Directory Id="ProgramFilesFolder">
+                <Directory Id="INSTALLFOLDER" Name="TinyFileSentry" />
+              </Directory>
+            </Directory>
+          </Fragment>
+          
+          <Fragment>
+            <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+              <Component Id="MainExecutable" Guid="*">
+                <File Id="TinyFileSentryAppExe" Source="./publish/TinyFileSentry.App.exe" />
+              </Component>
+              <Component Id="RuntimeFiles" Guid="*">
+                <File Id="TinyFileSentryCoreLib" Source="./publish/TinyFileSentry.Core.dll" />
+              </Component>
+            </ComponentGroup>
+          </Fragment>
+        </Wix>
+        "@
+        
+        $wxsContent | Out-File -FilePath "TinyFileSentry.wxs" -Encoding UTF8
+        
+        # Build MSI
+        wix build TinyFileSentry.wxs -o TinyFileSentry.msi
+
+    # Create GitHub Release
+    - name: Create GitHub Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
       with:
-        name: TinyFileSentry-win-x64
-        path: ./publish
+        tag_name: v${{ github.run_number }}
+        name: Release v${{ github.run_number }}
+        body: |
+          ## TinyFileSentry Release v${{ github.run_number }}
+          
+          Автоматически сгенерированный релиз из ветки main.
+          
+          ### Установка
+          Скачайте и запустите TinyFileSentry.msi
+          
+          ### Изменения
+          - Последний коммит: ${{ github.event.head_commit.message }}
+        files: |
+          TinyFileSentry.msi
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
