@@ -84,18 +84,19 @@ jobs:
           
           <Fragment>
             <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-              <Component Id="AllFiles" Guid="*">
         "@
         
-        # Add all files from publish directory
+        # Add all files from publish directory - each file in separate component
         $files = Get-ChildItem -Path ./publish -File
         foreach ($file in $files) {
           $fileId = $file.Name.Replace(".", "").Replace("-", "")
-          $wxsContent += "        <File Id=""$fileId"" Source=""./publish/$($file.Name)"" />`n"
+          $componentId = "Component_$fileId"
+          $wxsContent += "        <Component Id=""$componentId"" Guid=""*"">`n"
+          $wxsContent += "          <File Id=""$fileId"" Source=""./publish/$($file.Name)"" />`n"
+          $wxsContent += "        </Component>`n"
         }
         
         $wxsContent += @"
-              </Component>
             </ComponentGroup>
           </Fragment>
         </Wix>
