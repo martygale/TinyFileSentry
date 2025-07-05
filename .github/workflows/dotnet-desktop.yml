@@ -1,0 +1,136 @@
+name: TinyFileSentry Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+
+  build:
+
+    runs-on: windows-latest
+
+    env:
+      Solution_Directory: TinyFileSentry
+      Test_Project_Path: TinyFileSentry.Tests/TinyFileSentry.Tests.csproj
+      App_Project_Path: TinyFileSentry.App/TinyFileSentry.App.csproj
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    # Install the .NET workload
+    - name: Install .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    # Restore dependencies
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # Build the solution
+    - name: Build solution
+      run: dotnet build --configuration Release --no-restore
+
+    # Execute unit tests
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build --verbosity normal
+
+    # Publish the application
+    - name: Publish application
+      run: dotnet publish $env:App_Project_Path -c Release -r win-x64 -o ./publish
+
+    # Install WiX v4 CLI
+    - name: Install WiX v4 CLI
+      run: |
+        dotnet tool install --global wix --version 4.0.0
+        wix --version
+
+    # Create MSI installer
+    - name: Create MSI installer
+      run: |
+        # List files in publish directory for debugging
+        Write-Host "Files in publish directory:"
+        Get-ChildItem -Path ./publish -Recurse | Format-Table Name, FullName
+        
+        # Create comprehensive WiX source file with all files
+        $wxsContent = @"
+        <?xml version="1.0" encoding="UTF-8"?>
+        <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+          <Package Name="TinyFileSentry" Version="1.0.0" Manufacturer="TinyFileSentry" UpgradeCode="12345678-1234-1234-1234-123456789012">
+            <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+            <MediaTemplate EmbedCab="yes" />
+            
+            <Feature Id="ProductFeature" Title="TinyFileSentry" Level="1">
+              <ComponentGroupRef Id="ProductComponents" />
+            </Feature>
+          </Package>
+          
+          <Fragment>
+            <Directory Id="TARGETDIR" Name="SourceDir">
+              <Directory Id="ProgramFilesFolder">
+                <Directory Id="INSTALLFOLDER" Name="TinyFileSentry" />
+              </Directory>
+            </Directory>
+          </Fragment>
+          
+          <Fragment>
+            <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+        "@
+        
+        # Add all files from publish directory - each file in separate component
+        $files = Get-ChildItem -Path ./publish -File
+        foreach ($file in $files) {
+          $fileId = $file.Name.Replace(".", "").Replace("-", "")
+          $componentId = "Component_$fileId"
+          $wxsContent += "        <Component Id=""$componentId"" Guid=""*"">`n"
+          $wxsContent += "          <File Id=""$fileId"" Source=""./publish/$($file.Name)"" />`n"
+          $wxsContent += "        </Component>`n"
+        }
+        
+        $wxsContent += @"
+            </ComponentGroup>
+          </Fragment>
+        </Wix>
+        "@
+        
+        $wxsContent | Out-File -FilePath "TinyFileSentry.wxs" -Encoding UTF8
+        
+        # Show generated WXS for debugging
+        Write-Host "Generated WXS content:"
+        Get-Content TinyFileSentry.wxs
+        
+        # Build MSI
+        wix build TinyFileSentry.wxs -out TinyFileSentry.msi
+
+    # Create GitHub Release
+    - name: Create GitHub Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ github.run_number }}
+        name: Release v${{ github.run_number }}
+        body: |
+          ## TinyFileSentry Release v${{ github.run_number }}
+          
+          Automatically generated release from main branch.
+          
+          ### Installation
+          Download and run TinyFileSentry.msi
+          
+          ### Changes
+          - ${{ github.event.head_commit.message }}
+        files: |
+          TinyFileSentry.msi
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
