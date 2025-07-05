@@ -51,17 +51,17 @@ jobs:
     # Install WiX v4 CLI
     - name: Install WiX v4 CLI
       run: |
-        dotnet tool install --global wix --version 4.0.5
+        dotnet tool install --global wix --version 4.0.0
         wix --version
 
     # Create MSI installer
     - name: Create MSI installer
       run: |
-        # Use WiX heat to harvest all files
-        wix extension add WixToolset.Heat.wixext
-        wix heat dir ./publish -o harvested.wxs -cg HarvestedFiles -gg -sfrag -srd -dr INSTALLFOLDER
+        # List files in publish directory for debugging
+        Write-Host "Files in publish directory:"
+        Get-ChildItem -Path ./publish -Recurse | Format-Table Name, FullName
         
-        # Create main WiX source file
+        # Create comprehensive WiX source file with all files
         $wxsContent = @"
         <?xml version="1.0" encoding="UTF-8"?>
         <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
@@ -70,7 +70,7 @@ jobs:
             <MediaTemplate EmbedCab="yes" />
             
             <Feature Id="ProductFeature" Title="TinyFileSentry" Level="1">
-              <ComponentGroupRef Id="HarvestedFiles" />
+              <ComponentGroupRef Id="ProductComponents" />
             </Feature>
           </Package>
           
@@ -81,13 +81,34 @@ jobs:
               </Directory>
             </Directory>
           </Fragment>
+          
+          <Fragment>
+            <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+              <Component Id="AllFiles" Guid="*">
+        "@
+        
+        # Add all files from publish directory
+        $files = Get-ChildItem -Path ./publish -File
+        foreach ($file in $files) {
+          $fileId = $file.Name.Replace(".", "").Replace("-", "")
+          $wxsContent += "        <File Id=""$fileId"" Source=""./publish/$($file.Name)"" />`n"
+        }
+        
+        $wxsContent += @"
+              </Component>
+            </ComponentGroup>
+          </Fragment>
         </Wix>
         "@
         
         $wxsContent | Out-File -FilePath "TinyFileSentry.wxs" -Encoding UTF8
         
+        # Show generated WXS for debugging
+        Write-Host "Generated WXS content:"
+        Get-Content TinyFileSentry.wxs
+        
         # Build MSI
-        wix build TinyFileSentry.wxs harvested.wxs -o TinyFileSentry.msi
+        wix build TinyFileSentry.wxs -out TinyFileSentry.msi
 
     # Create GitHub Release
     - name: Create GitHub Release
