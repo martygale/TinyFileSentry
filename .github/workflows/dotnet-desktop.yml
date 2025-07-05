@@ -57,7 +57,11 @@ jobs:
     # Create MSI installer
     - name: Create MSI installer
       run: |
-        # Create WiX source file
+        # Use WiX heat to harvest all files
+        wix extension add WixToolset.Heat.wixext
+        wix heat dir ./publish -o harvested.wxs -cg HarvestedFiles -gg -sfrag -srd -dr INSTALLFOLDER
+        
+        # Create main WiX source file
         $wxsContent = @"
         <?xml version="1.0" encoding="UTF-8"?>
         <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
@@ -66,7 +70,7 @@ jobs:
             <MediaTemplate EmbedCab="yes" />
             
             <Feature Id="ProductFeature" Title="TinyFileSentry" Level="1">
-              <ComponentGroupRef Id="ProductComponents" />
+              <ComponentGroupRef Id="HarvestedFiles" />
             </Feature>
           </Package>
           
@@ -77,24 +81,13 @@ jobs:
               </Directory>
             </Directory>
           </Fragment>
-          
-          <Fragment>
-            <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-              <Component Id="MainExecutable" Guid="*">
-                <File Id="TinyFileSentryAppExe" Source="./publish/TinyFileSentry.App.exe" />
-              </Component>
-              <Component Id="RuntimeFiles" Guid="*">
-                <File Id="TinyFileSentryCoreLib" Source="./publish/TinyFileSentry.Core.dll" />
-              </Component>
-            </ComponentGroup>
-          </Fragment>
         </Wix>
         "@
         
         $wxsContent | Out-File -FilePath "TinyFileSentry.wxs" -Encoding UTF8
         
         # Build MSI
-        wix build TinyFileSentry.wxs -o TinyFileSentry.msi
+        wix build TinyFileSentry.wxs harvested.wxs -o TinyFileSentry.msi
 
     # Create GitHub Release
     - name: Create GitHub Release
