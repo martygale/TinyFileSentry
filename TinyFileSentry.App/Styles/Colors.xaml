@@ -33,4 +33,9 @@
     <SolidColorBrush x:Key="SelectedBrush" Color="{x:Static SystemColors.HighlightColor}"/>
     <SolidColorBrush x:Key="FocusBrush" Color="{x:Static SystemColors.AccentColor}"/>
     
+    <!-- Pen ресурсы для иконок -->
+    <Pen x:Key="SecondaryTextPen" Brush="{StaticResource SecondaryTextBrush}" Thickness="2"/>
+    <Pen x:Key="SuccessPen" Brush="{StaticResource SuccessBrush}" Thickness="2"/>
+    <Pen x:Key="SystemAccentPen" Brush="{StaticResource SystemAccentBrush}" Thickness="2"/>
+    
 </ResourceDictionary>

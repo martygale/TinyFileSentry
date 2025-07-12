@@ -251,19 +251,38 @@ public partial class MainWindow : Window
     {
         try
         {
-            var iconUri = new Uri("pack://application:,,,/Resources/Icons/app-icon-16.png");
+            // Use PNG for tray icon to ensure transparency support
+            var iconUri = new Uri("pack://application:,,,/Resources/Icons/app-icon-64.png");
             var streamResourceInfo = Application.GetResourceStream(iconUri);
             if (streamResourceInfo != null)
             {
                 var bitmap = new System.Drawing.Bitmap(streamResourceInfo.Stream);
+                // PNG already has correct transparency, no need to make transparent
                 var icon = System.Drawing.Icon.FromHandle(bitmap.GetHicon());
+                TrayIcon.Icon = icon;
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logService?.Warning($"Failed to load PNG tray icon: {ex.Message}", nameof(MainWindow));
+        }
+        
+        try
+        {
+            // Fallback to ICO file
+            var iconUri = new Uri("pack://application:,,,/Resources/Icons/app-icon.ico");
+            var streamResourceInfo = Application.GetResourceStream(iconUri);
+            if (streamResourceInfo != null)
+            {
+                var icon = new System.Drawing.Icon(streamResourceInfo.Stream);
                 TrayIcon.Icon = icon;
             }
         }
         catch (Exception ex)
         {
             // If failed to load icon, use default system icon
-            _logService?.Warning($"Failed to load tray icon: {ex.Message}", nameof(MainWindow));
+            _logService?.Warning($"Failed to load fallback tray icon: {ex.Message}", nameof(MainWindow));
         }
     }
     

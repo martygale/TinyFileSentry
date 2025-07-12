@@ -101,6 +101,74 @@
         </DrawingImage.Drawing>
     </DrawingImage>
     
+    <!-- Security and monitoring icons in Lucide style -->
+    <DrawingImage x:Key="ScanEyeIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <!-- Scanning frame corners -->
+                <GeometryDrawing Brush="Transparent" 
+                               Geometry="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" 
+                               Pen="{StaticResource SecondaryTextPen}" />
+                <!-- Eye center -->
+                <GeometryDrawing Brush="{StaticResource SecondaryTextBrush}" 
+                               Geometry="M12 12 m -1 0 a 1 1 0 1 1 2 0 a 1 1 0 1 1 -2 0" />
+                <!-- Eye shape -->
+                <GeometryDrawing Brush="Transparent" 
+                               Geometry="M18.944 12.33a1 1 0 0 0 0-.66a7.5 7.5 0 0 0-13.888 0a1 1 0 0 0 0 .66a7.5 7.5 0 0 0 13.888 0" 
+                               Pen="{StaticResource SecondaryTextPen}" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    
+    <DrawingImage x:Key="ShieldCheckIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <!-- Shield -->
+                <GeometryDrawing Brush="Transparent" 
+                               Geometry="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" 
+                               Pen="{StaticResource SuccessPen}" />
+                <!-- Check mark -->
+                <GeometryDrawing Brush="Transparent" 
+                               Geometry="m9 12l2 2l4-4" 
+                               Pen="{StaticResource SuccessPen}" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    
+    <DrawingImage x:Key="FileScanIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <!-- File -->
+                <GeometryDrawing Brush="Transparent" 
+                               Geometry="M20 10V7l-5-5H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4" 
+                               Pen="{StaticResource SecondaryTextPen}" />
+                <!-- File corner -->
+                <GeometryDrawing Brush="Transparent" 
+                               Geometry="M14 2v4a2 2 0 0 0 2 2h4" 
+                               Pen="{StaticResource SecondaryTextPen}" />
+                <!-- Scan lines -->
+                <GeometryDrawing Brush="Transparent" 
+                               Geometry="m16 16a2 2 0 0 0-2 2m6-2a2 2 0 0 1 2 2m-2 6a2 2 0 0 0 2-2m-6 2a2 2 0 0 1-2-2" 
+                               Pen="{StaticResource SystemAccentPen}" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    
+    <DrawingImage x:Key="EyeIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <!-- Eye shape -->
+                <GeometryDrawing Brush="Transparent" 
+                               Geometry="M2.062 12.348a1 1 0 0 1 0-.696a10.75 10.75 0 0 1 19.876 0a1 1 0 0 1 0 .696a10.75 10.75 0 0 1-19.876 0" 
+                               Pen="{StaticResource SecondaryTextPen}" />
+                <!-- Eye center -->
+                <GeometryDrawing Brush="Transparent" 
+                               Geometry="M12 12 m -3 0 a 3 3 0 1 1 6 0 a 3 3 0 1 1 -6 0" 
+                               Pen="{StaticResource SecondaryTextPen}" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    
     <DrawingImage x:Key="FolderIcon">
         <DrawingImage.Drawing>
             <DrawingGroup>

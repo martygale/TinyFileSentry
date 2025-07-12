@@ -85,6 +85,9 @@ jobs:
         Write-Host "Files in publish directory:"
         Get-ChildItem -Path ./publish -Recurse | Format-Table Name, FullName
         
+        # Copy icon file for WiX
+        Copy-Item "TinyFileSentry.App/Resources/Icons/app-icon.ico" -Destination "app-icon.ico"
+        
         # Create comprehensive WiX source file with all files
         $wxsContent = @"
         <?xml version="1.0" encoding="UTF-8"?>
@@ -92,6 +95,9 @@ jobs:
           <Package Name="TinyFileSentry" Version="${{ steps.version.outputs.VERSION }}" Manufacturer="TinyFileSentry" UpgradeCode="12345678-1234-1234-1234-123456789012">
             <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
             <MediaTemplate EmbedCab="yes" />
+            
+            <Icon Id="AppIcon.ico" SourceFile="app-icon.ico" />
+            <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
             
             <Feature Id="ProductFeature" Title="TinyFileSentry" Level="1">
               <ComponentGroupRef Id="ProductComponents" />
@@ -108,6 +114,11 @@ jobs:
           
           <Fragment>
             <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+              <!-- Registry component for Add/Remove Programs icon -->
+              <Component Id="RegistryComponent" Guid="*">
+                <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\[ProductCode]"
+                               Name="DisplayIcon" Value="[INSTALLFOLDER]TinyFileSentry.App.exe" Type="string" />
+              </Component>
         "@
         
         # Add all files from publish directory - each file in separate component

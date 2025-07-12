@@ -24,7 +24,7 @@
     <None Include="Resources\**" />
     <Resource Include="Resources\Icons\*.png" />
     <Resource Include="Resources\Icons\*.svg" />
-    <Content Include="Resources\Icons\app-icon.ico" />
+    <Resource Include="Resources\Icons\app-icon.ico" />
   </ItemGroup>
 
 </Project>

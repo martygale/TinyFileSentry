@@ -8,7 +8,7 @@
         MinHeight="600" 
         MinWidth="900"
         Style="{StaticResource MainWindowStyle}"
-        Icon="Resources/Icons/app-icon-32.png"
+        Icon="Resources/Icons/app-icon.ico"
         WindowStartupLocation="CenterScreen">
     
     <Window.Resources>
