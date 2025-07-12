@@ -109,6 +109,7 @@ jobs:
               <Directory Id="ProgramFilesFolder">
                 <Directory Id="INSTALLFOLDER" Name="TinyFileSentry" />
               </Directory>
+              <Directory Id="DesktopFolder" Name="Desktop" />
             </Directory>
           </Fragment>
           
@@ -118,6 +119,17 @@ jobs:
               <Component Id="RegistryComponent" Guid="*">
                 <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\[ProductCode]"
                                Name="DisplayIcon" Value="[INSTALLFOLDER]TinyFileSentry.App.exe" Type="string" />
+              </Component>
+              <!-- Desktop shortcut component -->
+              <Component Id="DesktopShortcutComponent" Guid="*" Directory="DesktopFolder">
+                <Shortcut Id="DesktopShortcut" 
+                          Name="TinyFileSentry" 
+                          Description="TinyFileSentry - File monitoring and backup utility"
+                          Target="[INSTALLFOLDER]TinyFileSentry.App.exe" 
+                          WorkingDirectory="INSTALLFOLDER"
+                          Icon="AppIcon.ico" />
+                <RemoveFolder Id="DesktopFolderRemove" Directory="DesktopFolder" On="uninstall" />
+                <RegistryValue Root="HKCU" Key="Software\TinyFileSentry" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
               </Component>
         "@
         
