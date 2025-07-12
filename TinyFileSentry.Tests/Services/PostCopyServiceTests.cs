@@ -179,4 +179,115 @@ public class PostCopyServiceTests
         // Verify that path with spaces is properly escaped with quotes
         _processRunnerMock.Verify(x => x.RunCommand("git", $"add \"{filePath}\"", "/dest"), Times.Once);
     }
+
+    [Test]
+    public async Task ExecutePostActionAsync_WithGitCommitAndPush_Success_ReturnsTrue()
+    {
+        _fileSystemMock.Setup(x => x.FileExists("/dest/test.txt")).Returns(true);
+        _processRunnerMock.Setup(x => x.RunCommand("git", "add \"/dest/test.txt\"", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 0 });
+        _processRunnerMock.Setup(x => x.RunCommand("git", "commit -m \"Auto-backup from /source/test.txt\"", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 0 });
+        _processRunnerMock.Setup(x => x.RunCommand("git", "push", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 0 });
+
+        var result = await _postCopyService.ExecutePostActionAsync(
+            PostActionType.GitCommitAndPush, 
+            "/dest/test.txt", 
+            "/dest",
+            "/source/test.txt");
+
+        Assert.That(result, Is.True);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "add \"/dest/test.txt\"", "/dest"), Times.Once);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "commit -m \"Auto-backup from /source/test.txt\"", "/dest"), Times.Once);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "push", "/dest"), Times.Once);
+    }
+
+    [Test]
+    public async Task ExecutePostActionAsync_WithGitCommitAndPush_AddFails_ReturnsFalse()
+    {
+        _fileSystemMock.Setup(x => x.FileExists("/dest/test.txt")).Returns(true);
+        _processRunnerMock.Setup(x => x.RunCommand("git", "add \"/dest/test.txt\"", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 1, StdErr = "Error adding file" });
+
+        var result = await _postCopyService.ExecutePostActionAsync(
+            PostActionType.GitCommitAndPush, 
+            "/dest/test.txt", 
+            "/dest",
+            "/source/test.txt");
+
+        Assert.That(result, Is.False);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "add \"/dest/test.txt\"", "/dest"), Times.Once);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "commit -m \"Auto-backup from /source/test.txt\"", "/dest"), Times.Never);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "push", "/dest"), Times.Never);
+        _logServiceMock.Verify(x => x.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
+    [Test]
+    public async Task ExecutePostActionAsync_WithGitCommitAndPush_CommitFails_ReturnsFalse()
+    {
+        _fileSystemMock.Setup(x => x.FileExists("/dest/test.txt")).Returns(true);
+        _processRunnerMock.Setup(x => x.RunCommand("git", "add \"/dest/test.txt\"", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 0 });
+        _processRunnerMock.Setup(x => x.RunCommand("git", "commit -m \"Auto-backup from /source/test.txt\"", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 128, StdErr = "repository not found" });
+
+        var result = await _postCopyService.ExecutePostActionAsync(
+            PostActionType.GitCommitAndPush, 
+            "/dest/test.txt", 
+            "/dest",
+            "/source/test.txt");
+
+        Assert.That(result, Is.False);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "add \"/dest/test.txt\"", "/dest"), Times.Once);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "commit -m \"Auto-backup from /source/test.txt\"", "/dest"), Times.Once);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "push", "/dest"), Times.Never);
+        _logServiceMock.Verify(x => x.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
+    [Test]
+    public async Task ExecutePostActionAsync_WithGitCommitAndPush_PushFails_ReturnsFalse()
+    {
+        _fileSystemMock.Setup(x => x.FileExists("/dest/test.txt")).Returns(true);
+        _processRunnerMock.Setup(x => x.RunCommand("git", "add \"/dest/test.txt\"", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 0 });
+        _processRunnerMock.Setup(x => x.RunCommand("git", "commit -m \"Auto-backup from /source/test.txt\"", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 0 });
+        _processRunnerMock.Setup(x => x.RunCommand("git", "push", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 1, StdErr = "Push failed" });
+
+        var result = await _postCopyService.ExecutePostActionAsync(
+            PostActionType.GitCommitAndPush, 
+            "/dest/test.txt", 
+            "/dest",
+            "/source/test.txt");
+
+        Assert.That(result, Is.False);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "add \"/dest/test.txt\"", "/dest"), Times.Once);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "commit -m \"Auto-backup from /source/test.txt\"", "/dest"), Times.Once);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "push", "/dest"), Times.Once);
+        _logServiceMock.Verify(x => x.Error(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
+    [Test]
+    public async Task ExecutePostActionAsync_WithGitCommitAndPush_NothingToCommit_ReturnsTrue()
+    {
+        _fileSystemMock.Setup(x => x.FileExists("/dest/test.txt")).Returns(true);
+        _processRunnerMock.Setup(x => x.RunCommand("git", "add \"/dest/test.txt\"", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 0 });
+        _processRunnerMock.Setup(x => x.RunCommand("git", "commit -m \"Auto-backup from /source/test.txt\"", "/dest"))
+            .Returns(new ProcessResult { ExitCode = 1, StdOut = "nothing to commit, working tree clean" });
+
+        var result = await _postCopyService.ExecutePostActionAsync(
+            PostActionType.GitCommitAndPush, 
+            "/dest/test.txt", 
+            "/dest",
+            "/source/test.txt");
+
+        Assert.That(result, Is.True);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "add \"/dest/test.txt\"", "/dest"), Times.Once);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "commit -m \"Auto-backup from /source/test.txt\"", "/dest"), Times.Once);
+        _processRunnerMock.Verify(x => x.RunCommand("git", "push", "/dest"), Times.Never); // Should not push if nothing to commit
+        _logServiceMock.Verify(x => x.Info(It.Is<string>(s => s.Contains("skipped - no changes to commit")), It.IsAny<string>()), Times.Once);
+    }
 }

@@ -2,9 +2,8 @@ name: TinyFileSentry Build and Test
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 permissions:
   contents: write
@@ -26,11 +25,36 @@ jobs:
       with:
         fetch-depth: 0
 
+    # Extract version from tag
+    - name: Extract version from tag
+      id: version
+      run: |
+        $tag = "${{ github.ref_name }}"
+        $version = $tag -replace '^v', ''
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "Extracted version: $version"
+
     # Install the .NET workload
     - name: Install .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
+
+    # Update version in project files
+    - name: Update version in project files
+      run: |
+        $version = "${{ steps.version.outputs.VERSION }}"
+        echo "Updating version to: $version"
+        
+        # Update Directory.Build.props
+        $content = Get-Content "Directory.Build.props" -Raw
+        $content = $content -replace '<Version>.*</Version>', "<Version>$version</Version>"
+        $content = $content -replace '<AssemblyVersion>.*</AssemblyVersion>', "<AssemblyVersion>$version.0</AssemblyVersion>"
+        $content = $content -replace '<FileVersion>.*</FileVersion>', "<FileVersion>$version.0</FileVersion>"
+        Set-Content "Directory.Build.props" -Value $content
+        
+        echo "Updated Directory.Build.props:"
+        Get-Content "Directory.Build.props"
 
     # Restore dependencies
     - name: Restore dependencies
@@ -65,7 +89,7 @@ jobs:
         $wxsContent = @"
         <?xml version="1.0" encoding="UTF-8"?>
         <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-          <Package Name="TinyFileSentry" Version="1.0.0" Manufacturer="TinyFileSentry" UpgradeCode="12345678-1234-1234-1234-123456789012">
+          <Package Name="TinyFileSentry" Version="${{ steps.version.outputs.VERSION }}" Manufacturer="TinyFileSentry" UpgradeCode="12345678-1234-1234-1234-123456789012">
             <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
             <MediaTemplate EmbedCab="yes" />
             
@@ -113,21 +137,20 @@ jobs:
 
     # Create GitHub Release
     - name: Create GitHub Release
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ github.run_number }}
-        name: Release v${{ github.run_number }}
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
         body: |
-          ## TinyFileSentry Release v${{ github.run_number }}
+          ## TinyFileSentry Release ${{ github.ref_name }}
           
-          Automatically generated release from main branch.
+          Automatically generated release from tag ${{ github.ref_name }}.
           
           ### Installation
           Download and run TinyFileSentry.msi
           
-          ### Changes
-          - ${{ github.event.head_commit.message }}
+          ### Version
+          ${{ steps.version.outputs.VERSION }}
         files: |
           TinyFileSentry.msi
         draft: false

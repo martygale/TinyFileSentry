@@ -6,5 +6,6 @@ namespace TinyFileSentry.Core.Models;
 public enum PostActionType
 {
     None,
-    GitCommit
+    GitCommit,
+    GitCommitAndPush
 }

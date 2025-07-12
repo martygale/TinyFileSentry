@@ -13,8 +13,6 @@ public class WatchRule
     [JsonPropertyName("postAction")]
     public PostActionType PostAction { get; set; } = PostActionType.None;
 
-    [JsonPropertyName("lastCopied")]
-    public DateTime? LastCopied { get; set; }
 
     [JsonPropertyName("isEnabled")]
     public bool IsEnabled { get; set; } = true;

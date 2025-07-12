@@ -171,22 +171,20 @@ public class PollerServiceTests
     }
 
     [Test]
-    public void UpdateRuleAfterSuccessfulCopy_UpdatesTimestamp()
+    public void UpdateRuleAfterSuccessfulCopy_DoesNothing()
     {
         // Arrange
         var rule = new WatchRule 
         { 
             SourceFile = @"C:\test\file.txt" 
         };
-        var currentTime = DateTime.UtcNow;
-        _mockClock.Setup(x => x.UtcNow).Returns(currentTime);
 
         // Act
         _pollerService.UpdateRuleAfterSuccessfulCopy(rule);
 
         // Assert
-        // UpdateRuleHash is no longer called, only UpdateRuleLastCopied
-        _mockRulesService.Verify(x => x.UpdateRuleLastCopied(rule, currentTime), Times.Once);
+        // Method should do nothing as LastCopied tracking was removed
+        _mockRulesService.VerifyNoOtherCalls();
     }
 
     [Test]
@@ -221,8 +219,7 @@ public class PollerServiceTests
             It.IsAny<string>(), 
             It.IsAny<string>(),
             It.IsAny<CancellationToken>()), Times.Once);
-        // UpdateRuleHash is no longer used
-        _mockRulesService.Verify(x => x.UpdateRuleLastCopied(rule, currentTime), Times.Once);
+        // UpdateRuleLastCopied is no longer used as LastCopied tracking was removed
     }
 
     [Test]
@@ -249,8 +246,7 @@ public class PollerServiceTests
         await _pollerService.ExecutePostCopyActionsAsync(rule, CancellationToken.None);
 
         // Assert
-        // UpdateRuleHash is no longer used
-        _mockRulesService.Verify(x => x.UpdateRuleLastCopied(It.IsAny<WatchRule>(), It.IsAny<DateTime>()), Times.Never);
+        // UpdateRuleLastCopied is no longer used as LastCopied tracking was removed
     }
 
     [Test]

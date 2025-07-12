@@ -13,7 +13,8 @@ public class PostCopyService : IPostCopyService
         _postActions = new Dictionary<PostActionType, IPostAction>
         {
             { PostActionType.None, new NonePostAction() },
-            { PostActionType.GitCommit, new GitCommitPostAction(processRunner, logService, fileSystem) }
+            { PostActionType.GitCommit, new GitCommitPostAction(processRunner, logService, fileSystem) },
+            { PostActionType.GitCommitAndPush, new GitCommitAndPushPostAction(processRunner, logService, fileSystem) }
         };
     }
 

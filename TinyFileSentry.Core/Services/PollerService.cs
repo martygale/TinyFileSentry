@@ -242,7 +242,6 @@ public class PollerService : IPollerService
     // Testable method - update rule after successful copy
     internal void UpdateRuleAfterSuccessfulCopy(Models.WatchRule rule)
     {
-        _rulesService.UpdateRuleLastCopied(rule, _clock.UtcNow);
         // Status is already set in ProcessRuleAsync, not needed here
     }
 }

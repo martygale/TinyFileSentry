@@ -27,11 +27,22 @@ public partial class RuleEditWindow : Window
             SaveButton.Content = "Save Changes";
         }
         
-        // Заполнение полей
-        SourceFileTextBox.Text = Rule.SourceFile;
-        DestinationFolderTextBox.Text = Rule.DestinationRoot;
+        // Установка DataContext для binding
+        DataContext = Rule;
         
-        // Установка post-action
+        // Установка ComboBox (не поддерживает прямой binding к enum)
+        SetPostActionComboBox();
+        
+        // Подписка на изменения для валидации
+        SourceFileTextBox.TextChanged += (s, e) => ValidateSource();
+        DestinationFolderTextBox.TextChanged += (s, e) => ValidateDestination();
+    }
+    
+    private void SetPostActionComboBox()
+    {
+        if (Rule == null) return;
+        
+        // Установка post-action (ComboBox не поддерживает прямой binding к enum)
         foreach (System.Windows.Controls.ComboBoxItem item in PostActionComboBox.Items)
         {
             if (item.Tag?.ToString() == Rule.PostAction.ToString())
@@ -40,10 +51,6 @@ public partial class RuleEditWindow : Window
                 break;
             }
         }
-        
-        // Подписка на изменения для валидации
-        SourceFileTextBox.TextChanged += (s, e) => ValidateSource();
-        DestinationFolderTextBox.TextChanged += (s, e) => ValidateDestination();
     }
     
     private void BrowseSourceButton_Click(object sender, RoutedEventArgs e)
@@ -87,7 +94,7 @@ public partial class RuleEditWindow : Window
     
     private void ValidateSource()
     {
-        var sourcePath = SourceFileTextBox.Text?.Trim();
+        var sourcePath = Rule?.SourceFile?.Trim();
         
         if (string.IsNullOrEmpty(sourcePath))
         {
@@ -122,7 +129,7 @@ public partial class RuleEditWindow : Window
     
     private void ValidateDestination()
     {
-        var destinationPath = DestinationFolderTextBox.Text?.Trim();
+        var destinationPath = Rule?.DestinationRoot?.Trim();
         
         if (string.IsNullOrEmpty(destinationPath))
         {
@@ -195,15 +202,12 @@ public partial class RuleEditWindow : Window
         if (!ValidateForm())
             return;
         
-        // Создание или обновление правила
-        Rule!.SourceFile = SourceFileTextBox.Text.Trim();
-        Rule.DestinationRoot = DestinationFolderTextBox.Text.Trim();
-        
+        // Обновление PostAction из ComboBox (SourceFile и DestinationRoot уже обновлены через binding)
         if (PostActionComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
         {
             if (Enum.TryParse<PostActionType>(selectedItem.Tag?.ToString(), out var postAction))
             {
-                Rule.PostAction = postAction;
+                Rule!.PostAction = postAction;
             }
         }
         

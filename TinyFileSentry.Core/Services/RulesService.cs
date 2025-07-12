@@ -47,7 +47,6 @@ public class RulesService : IRulesService
 
         existingRule.DestinationRoot = rule.DestinationRoot;
         existingRule.PostAction = rule.PostAction;
-        existingRule.LastCopied = rule.LastCopied;
 
         _configurationService.SaveConfiguration(_configuration);
         _logService.Info($"Watch rule updated: {rule.SourceFile}", nameof(RulesService));
@@ -72,9 +71,4 @@ public class RulesService : IRulesService
         }
     }
 
-    public void UpdateRuleLastCopied(WatchRule rule, DateTime lastCopied)
-    {
-        rule.LastCopied = lastCopied;
-        _configurationService.SaveConfiguration(_configuration);
-    }
 }

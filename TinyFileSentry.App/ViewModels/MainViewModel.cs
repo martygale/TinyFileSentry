@@ -250,15 +250,14 @@ public partial class MainViewModel : ObservableObject
     {
         if (isEdit)
         {
-            // Update existing rule
-            var existingViewModel = WatchRules.FirstOrDefault(r => r.Rule == rule);
-            if (existingViewModel != null)
+            // Завершить редактирование в CollectionView перед обновлением
+            if (_filteredRules is IEditableCollectionView editableView && editableView.IsEditingItem)
             {
-                existingViewModel.SourceFile = rule.SourceFile;
-                existingViewModel.DestinationRoot = rule.DestinationRoot;
-                existingViewModel.PostAction = rule.PostAction;
-                existingViewModel.IsEnabled = rule.IsEnabled;
+                editableView.CommitEdit();
             }
+            
+            // Update existing rule - объект уже обновлен через DataBinding
+            // Обновления ViewModel не нужны, так как Rule обновился напрямую
         }
         else
         {
@@ -272,7 +271,11 @@ public partial class MainViewModel : ObservableObject
         config.WatchRules = WatchRules.Select(r => r.Rule).ToList();
         _configurationService.SaveConfiguration(config);
         
-        _filteredRules.Refresh();
+        // Refresh только для новых правил, для редактирования не нужно
+        if (!isEdit)
+        {
+            _filteredRules.Refresh();
+        }
     }
     
     // Service event handlers

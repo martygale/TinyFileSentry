@@ -183,6 +183,7 @@
                              Padding="12,8">
                         <ComboBoxItem Content="None" Tag="None"/>
                         <ComboBoxItem Content="Git Commit (auto-backup)" Tag="GitCommit"/>
+                        <ComboBoxItem Content="Git Commit and Push (auto-backup + sync)" Tag="GitCommitAndPush"/>
                     </ComboBox>
                 </Grid>
             </Border>

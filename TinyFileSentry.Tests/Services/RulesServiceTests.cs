@@ -111,17 +111,6 @@ public class RulesServiceTests
     // [Test]
     // public void UpdateRuleHash_UpdatesHashAndSaves() - тест удален
 
-    [Test]
-    public void UpdateRuleLastCopied_UpdatesTimestampAndSaves()
-    {
-        var rule = new WatchRule { SourceFile = "test.txt", DestinationRoot = "/backup" };
-        var testTime = new DateTime(2025, 6, 22, 14, 5, 2, DateTimeKind.Utc);
-
-        _rulesService.UpdateRuleLastCopied(rule, testTime);
-
-        Assert.That(rule.LastCopied, Is.EqualTo(testTime));
-        _configurationServiceMock.Verify(x => x.SaveConfiguration(_testConfiguration), Times.Once);
-    }
 
     [Test]
     public void RuleAdded_EventIsFired()
