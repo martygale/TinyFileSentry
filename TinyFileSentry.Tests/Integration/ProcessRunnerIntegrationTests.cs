@@ -13,15 +13,15 @@ public class ProcessRunnerIntegrationTests
     {
         _processRunner = new ProcessRunner();
         
-        // Создаем временную папку для git-репозитория
+        // Create temporary folder for git repository
         _tempGitRepoPath = Path.Combine(Path.GetTempPath(), $"git_test_{Guid.NewGuid():N}");
         Directory.CreateDirectory(_tempGitRepoPath);
         
-        // Инициализируем git-репозиторий
+        // Initialize git repository
         var initResult = _processRunner.RunCommand("git", "init", _tempGitRepoPath);
         Assert.That(initResult.ExitCode, Is.EqualTo(0), $"Git init failed: {initResult.StdErr}");
         
-        // Настраиваем базовую конфигурацию git для тестов
+        // Setup basic git configuration for tests
         _processRunner.RunCommand("git", "config user.name \"Test User\"", _tempGitRepoPath);
         _processRunner.RunCommand("git", "config user.email \"test@example.com\"", _tempGitRepoPath);
     }
@@ -29,10 +29,10 @@ public class ProcessRunnerIntegrationTests
     [TearDown]
     public void TearDown()
     {
-        // Удаляем временную папку после каждого теста
+        // Delete temporary folder after each test
         if (Directory.Exists(_tempGitRepoPath))
         {
-            // Принудительно снимаем атрибуты только для чтения перед удалением (для Windows)
+            // Force remove read-only attributes before deletion (for Windows)
             RemoveReadOnlyAttributes(_tempGitRepoPath);
             Directory.Delete(_tempGitRepoPath, true);
         }
@@ -42,13 +42,13 @@ public class ProcessRunnerIntegrationTests
     {
         var directoryInfo = new DirectoryInfo(directoryPath);
         
-        // Снимаем атрибуты только для чтения с папки
+        // Remove read-only attributes from folder
         if (directoryInfo.Attributes.HasFlag(FileAttributes.ReadOnly))
         {
             directoryInfo.Attributes &= ~FileAttributes.ReadOnly;
         }
         
-        // Рекурсивно обрабатываем все файлы и папки
+        // Recursively process all files and folders
         foreach (var file in directoryInfo.GetFiles("*", SearchOption.AllDirectories))
         {
             if (file.Attributes.HasFlag(FileAttributes.ReadOnly))
@@ -97,7 +97,7 @@ public class ProcessRunnerIntegrationTests
 
         // Assert
         Assert.That(result.ExitCode, Is.EqualTo(0));
-        Assert.That(result.StdOut.Trim(), Is.Empty); // Пустой репозиторий без изменений
+        Assert.That(result.StdOut.Trim(), Is.Empty); // Empty repository without changes
     }
 
     [Test]
@@ -107,16 +107,16 @@ public class ProcessRunnerIntegrationTests
         var testFilePath = Path.Combine(_tempGitRepoPath, "test.txt");
         File.WriteAllText(testFilePath, "Test content");
 
-        // Act - добавляем файл
+        // Act - add file
         var addResult = _processRunner.RunCommand("git", "add test.txt", _tempGitRepoPath);
         
-        // Assert - проверяем что add прошел успешно
+        // Assert - verify that add was successful
         Assert.That(addResult.ExitCode, Is.EqualTo(0));
         
-        // Act - делаем коммит
+        // Act - make commit
         var commitResult = _processRunner.RunCommand("git", "commit -m \"Test commit\"", _tempGitRepoPath);
         
-        // Assert - проверяем что коммит прошел успешно
+        // Assert - verify that commit was successful
         Assert.That(commitResult.ExitCode, Is.EqualTo(0));
         Assert.That(commitResult.StdOut, Contains.Substring("Test commit"));
     }
@@ -176,7 +176,7 @@ public class ProcessRunnerIntegrationTests
     [Test]
     public void RunCommand_GitLog_WithCommits_ReturnsCommitHistory()
     {
-        // Arrange - создаем и коммитим файл
+        // Arrange - create and commit file
         var testFilePath = Path.Combine(_tempGitRepoPath, "history.txt");
         File.WriteAllText(testFilePath, "History test");
         

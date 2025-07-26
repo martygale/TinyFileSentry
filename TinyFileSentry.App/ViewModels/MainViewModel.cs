@@ -45,6 +45,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private int _pollingSpeedIndex = 2; // Default to Fast (index 2)
     
+    [ObservableProperty]
+    private bool _autoStart = false;
+    
     public ObservableCollection<WatchRuleViewModel> WatchRules { get; } = new();
     public ObservableCollection<LogEntryViewModel> LogEntries { get; } = new();
     
@@ -215,7 +218,7 @@ public partial class MainViewModel : ObservableObject
         
         // Force rule check
         ruleViewModel.Status = RuleStatus.Synchronized;
-        // TODO: Триггер проверки через PollerService
+        // TODO: Trigger check through PollerService
     }
     
     [RelayCommand]
@@ -233,6 +236,7 @@ public partial class MainViewModel : ObservableObject
         var config = _configurationService.LoadConfiguration();
         PollingSpeedIndex = config.PollingSpeed.ToComboBoxIndex();
         IsMonitoringActive = config.IsMonitoringActive;
+        AutoStart = config.AutoStart;
     }
     
     /// <summary>
@@ -243,6 +247,7 @@ public partial class MainViewModel : ObservableObject
         var config = _configurationService.LoadConfiguration();
         config.PollingSpeed = PollingSpeedExtensions.FromComboBoxIndex(PollingSpeedIndex);
         config.IsMonitoringActive = IsMonitoringActive;
+        config.AutoStart = AutoStart;
         _configurationService.SaveConfiguration(config);
     }
     
@@ -250,14 +255,14 @@ public partial class MainViewModel : ObservableObject
     {
         if (isEdit)
         {
-            // Завершить редактирование в CollectionView перед обновлением
+            // Complete editing in CollectionView before updating
             if (_filteredRules is IEditableCollectionView editableView && editableView.IsEditingItem)
             {
                 editableView.CommitEdit();
             }
             
-            // Update existing rule - объект уже обновлен через DataBinding
-            // Обновления ViewModel не нужны, так как Rule обновился напрямую
+            // Update existing rule - object already updated through DataBinding
+            // ViewModel updates not needed as Rule was updated directly
         }
         else
         {
@@ -271,7 +276,7 @@ public partial class MainViewModel : ObservableObject
         config.WatchRules = WatchRules.Select(r => r.Rule).ToList();
         _configurationService.SaveConfiguration(config);
         
-        // Refresh только для новых правил, для редактирования не нужно
+        // Refresh only for new rules, not needed for editing
         if (!isEdit)
         {
             _filteredRules.Refresh();

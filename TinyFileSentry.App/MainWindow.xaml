@@ -422,6 +422,29 @@
                                 Padding="24"
                                 Margin="0,0,0,32">
                             <StackPanel>
+                                <!-- Auto Start -->
+                                <Grid Margin="0,0,0,24">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Auto Start"
+                                                  FontWeight="Medium"
+                                                  Margin="0,0,0,4"/>
+                                        <TextBlock Text="Start application with Windows"
+                                                  Foreground="{StaticResource SecondaryTextBrush}"
+                                                  FontSize="13"/>
+                                    </StackPanel>
+                                    
+                                    <CheckBox Grid.Column="2"
+                                             x:Name="AutoStartCheckBox"
+                                             IsChecked="{Binding AutoStart}"
+                                             VerticalAlignment="Center"/>
+                                </Grid>
+                                
                                 <!-- Polling Speed -->
                                 <Grid Margin="0,0,0,24">
                                     <Grid.ColumnDefinitions>

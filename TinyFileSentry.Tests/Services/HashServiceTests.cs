@@ -24,7 +24,7 @@ public class HashServiceTests
         var result = _hashService.ComputeHash(data);
         
         Assert.That(result, Is.Not.Null.And.Not.Empty);
-        Assert.That(result.Length, Is.EqualTo(64)); // SHA256 хэш в hex формате
+        Assert.That(result.Length, Is.EqualTo(64)); // SHA256 hash in hex format
     }
 
     [Test]

@@ -10,16 +10,16 @@ public partial class App : Application
     {
         base.OnStartup(e);
         
-        // Настройка глобальной обработки исключений
+        // Setup global exception handling
         DispatcherUnhandledException += OnDispatcherUnhandledException;
         
-        // Применение системных цветов
+        // Apply system colors
         ApplySystemColors();
         
         var mainWindow = new MainWindow();
         MainWindow = mainWindow;
         
-        // Стартуем скрытыми, если нужно
+        // Start hidden if needed
         if (e.Args.Any(arg => arg == "--start-hidden"))
         {
             mainWindow.WindowState = WindowState.Minimized;
@@ -46,13 +46,13 @@ public partial class App : Application
     {
         try
         {
-            // Попытка получить системные цвета
+            // Try to get system colors
             var accentColor = SystemColors.AccentColor;
             var windowColor = SystemColors.WindowColor;
             var windowTextColor = SystemColors.WindowTextColor;
             var controlColor = SystemColors.ControlColor;
             
-            // Обновление ресурсов приложения
+            // Update application resources
             if (Resources["SystemAccentBrush"] is SolidColorBrush accentBrush)
                 accentBrush.Color = accentColor;
                 
@@ -67,14 +67,14 @@ public partial class App : Application
         }
         catch
         {
-            // Если системные цвета недоступны, используем fallback цвета
-            // (они уже установлены в XAML)
+            // If system colors are unavailable, use fallback colors
+            // (they are already set in XAML)
         }
     }
     
     protected override void OnExit(ExitEventArgs e)
     {
-        // Очистка ресурсов
+        // Resource cleanup
         base.OnExit(e);
     }
 }

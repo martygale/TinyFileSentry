@@ -90,8 +90,8 @@ public class PathSanitizerTests
     [Test]
     public void SanitizePath_WithLongPath_TruncatesTo200Characters()
     {
-        // Создаем путь длиннее 200 символов
-        var longPath = new string('a', 250); // 250 символов 'a'
+        // Create path longer than 200 characters
+        var longPath = new string('a', 250); // 250 'a' characters
         var result = _pathSanitizer.SanitizePath(longPath);
         
         Assert.That(result.Length, Is.EqualTo(200));
@@ -101,7 +101,7 @@ public class PathSanitizerTests
     [Test]
     public void SanitizePath_WithExactly200Characters_ReturnsUnchanged()
     {
-        // Создаем путь ровно в 200 символов
+        // Create path exactly 200 characters long
         var path200 = new string('b', 200);
         var result = _pathSanitizer.SanitizePath(path200);
         
@@ -112,15 +112,15 @@ public class PathSanitizerTests
     [Test]
     public void SanitizePath_WithLongPathAndInvalidChars_TruncatesAfterSanitization()
     {
-        // Длинный путь с недопустимыми символами (более 200 символов)
+        // Long path with invalid characters (more than 200 characters)
         var longPathWithInvalidChars = @"C:\Very\Long\Path\With\Many\Subdirectories\And\Some\Invalid<Chars>That\Need\To\Be\Replaced\With\Underscores\But\Also\Needs\To\Be\Truncated\Because\It\Is\Too\Long\For\Our\Limit\And\Even\More\Extra\Text\To\Make\Sure\We\Exceed\Two\Hundred\Characters\In\Total\Length";
         var result = _pathSanitizer.SanitizePath(longPathWithInvalidChars);
         
         Assert.That(result.Length, Is.EqualTo(200));
-        // Проверяем, что недопустимые символы заменены на подчеркивания
+        // Verify that invalid characters are replaced with underscores
         Assert.That(result, Does.Not.Contain("<"));
         Assert.That(result, Does.Not.Contain(">"));
-        // Проверяем, что путь в нижнем регистре
+        // Verify that path is in lowercase
         Assert.That(result, Is.EqualTo(result.ToLowerInvariant()));
     }
 }

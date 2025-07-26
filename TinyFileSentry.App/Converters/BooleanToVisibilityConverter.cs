@@ -6,7 +6,7 @@ using System.Windows.Data;
 namespace TinyFileSentry.App.Converters;
 
 /// <summary>
-/// Конвертер Boolean в Visibility
+/// Boolean to Visibility converter
 /// </summary>
 public class BooleanToVisibilityConverter : IValueConverter
 {

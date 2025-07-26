@@ -10,6 +10,9 @@ public class Configuration
     [JsonPropertyName("isMonitoringActive")]
     public bool IsMonitoringActive { get; set; } = true;
 
+    [JsonPropertyName("autoStart")]
+    public bool AutoStart { get; set; } = false;
+
     [JsonPropertyName("watchRules")]
     public List<WatchRule> WatchRules { get; set; } = new();
 }

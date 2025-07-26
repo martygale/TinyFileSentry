@@ -1,11 +1,16 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Hardcodet.Wpf.TaskbarNotification;
+using TinyFileSentry.App.Services;
 using TinyFileSentry.App.ViewModels;
 using TinyFileSentry.App.Views;
+using TinyFileSentry.Core.Interfaces;
 using TinyFileSentry.Core.Models;
 using TinyFileSentry.Core.Services;
 
@@ -15,6 +20,7 @@ public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel;
     private readonly LogService _logService;
+    private readonly IAutoStartService _autoStartService;
     
     public MainWindow()
     {
@@ -43,12 +49,16 @@ public partial class MainWindow : Window
             configService, 
             pathSanitizer);
         
+        _autoStartService = new WindowsAutoStartService();
+        
         _viewModel = new MainViewModel(pollerService, rulesService, _logService, configService);
         DataContext = _viewModel;
         
+        // Subscribe to property changes
+        _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+        
         // Update monitoring UI state
         UpdateMonitoringStatus();
-        _viewModel.PropertyChanged += OnViewModelPropertyChanged;
         
         // Load settings to UI
         LoadSettingsUI();
@@ -70,6 +80,56 @@ public partial class MainWindow : Window
         if (e.PropertyName == nameof(MainViewModel.IsMonitoringActive))
         {
             UpdateMonitoringStatus();
+        }
+        else if (e.PropertyName == nameof(MainViewModel.AutoStart))
+        {
+            HandleAutoStartChange();
+        }
+    }
+    
+    private void HandleAutoStartChange()
+    {
+        try
+        {
+            if (_viewModel.AutoStart)
+            {
+                // Get path to current executable file
+                var currentProcess = Process.GetCurrentProcess();
+                var applicationPath = currentProcess.MainModule?.FileName;
+                
+                if (!string.IsNullOrEmpty(applicationPath))
+                {
+                    var success = _autoStartService.EnableAutoStart(applicationPath);
+                    if (success)
+                    {
+                        _logService.Log(Core.Models.LogLevel.Info, "AutoStart enabled successfully");
+                    }
+                    else
+                    {
+                        _logService.Log(Core.Models.LogLevel.Warning, "Failed to enable AutoStart");
+                    }
+                }
+                else
+                {
+                    _logService.Log(Core.Models.LogLevel.Error, "Could not determine application path for AutoStart");
+                }
+            }
+            else
+            {
+                var success = _autoStartService.DisableAutoStart();
+                if (success)
+                {
+                    _logService.Log(Core.Models.LogLevel.Info, "AutoStart disabled successfully");
+                }
+                else
+                {
+                    _logService.Log(Core.Models.LogLevel.Warning, "Failed to disable AutoStart");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logService.Log(Core.Models.LogLevel.Error, $"Error handling AutoStart change: {ex.Message}");
         }
     }
     

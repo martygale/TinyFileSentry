@@ -7,7 +7,7 @@ using TinyFileSentry.Core.Models;
 namespace TinyFileSentry.App.ViewModels;
 
 /// <summary>
-/// ViewModel для записи в логе активности
+/// ViewModel for activity log entry
 /// </summary>
 public class LogEntryViewModel : INotifyPropertyChanged
 {

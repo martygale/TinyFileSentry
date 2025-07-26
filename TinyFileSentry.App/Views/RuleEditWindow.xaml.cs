@@ -19,7 +19,7 @@ public partial class RuleEditWindow : Window
         IsEditMode = rule != null;
         Rule = rule ?? new WatchRule();
         
-        // Настройка заголовка
+        // Setup window title
         if (IsEditMode)
         {
             WindowTitleText.Text = "Edit Rule";
@@ -27,13 +27,13 @@ public partial class RuleEditWindow : Window
             SaveButton.Content = "Save Changes";
         }
         
-        // Установка DataContext для binding
+        // Set DataContext for binding
         DataContext = Rule;
         
-        // Установка ComboBox (не поддерживает прямой binding к enum)
+        // Setup ComboBox (doesn't support direct binding to enum)
         SetPostActionComboBox();
         
-        // Подписка на изменения для валидации
+        // Subscribe to changes for validation
         SourceFileTextBox.TextChanged += (s, e) => ValidateSource();
         DestinationFolderTextBox.TextChanged += (s, e) => ValidateDestination();
     }
@@ -42,7 +42,7 @@ public partial class RuleEditWindow : Window
     {
         if (Rule == null) return;
         
-        // Установка post-action (ComboBox не поддерживает прямой binding к enum)
+        // Set post-action (ComboBox doesn't support direct binding to enum)
         foreach (System.Windows.Controls.ComboBoxItem item in PostActionComboBox.Items)
         {
             if (item.Tag?.ToString() == Rule.PostAction.ToString())
@@ -108,7 +108,7 @@ public partial class RuleEditWindow : Window
             return;
         }
         
-        // Проверка размера файла (>10MB)
+        // Check file size (>10MB)
         try
         {
             var fileInfo = new FileInfo(sourcePath);
@@ -150,7 +150,7 @@ public partial class RuleEditWindow : Window
             }
         }
         
-        // Проверка прав доступа
+        // Check write permissions
         try
         {
             var testFile = Path.Combine(destinationPath, "test_write_access.tmp");
@@ -202,7 +202,7 @@ public partial class RuleEditWindow : Window
         if (!ValidateForm())
             return;
         
-        // Обновление PostAction из ComboBox (SourceFile и DestinationRoot уже обновлены через binding)
+        // Update PostAction from ComboBox (SourceFile and DestinationRoot already updated through binding)
         if (PostActionComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItem)
         {
             if (Enum.TryParse<PostActionType>(selectedItem.Tag?.ToString(), out var postAction))

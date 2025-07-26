@@ -24,10 +24,10 @@ public class PathSanitizer : IPathSanitizer
             sanitized = sanitized.Replace(invalidChar, "_");
         }
 
-        // Приводим путь к нижнему регистру для консистентности
+        // Convert path to lowercase for consistency
         sanitized = sanitized.ToLowerInvariant();
         
-        // Ограничиваем длину для кроссплатформенной совместимости
+        // Limit length for cross-platform compatibility
         if (sanitized.Length > 200)
         {
             sanitized = sanitized.Substring(0, 200);

@@ -109,7 +109,7 @@ public class RulesServiceTests
 
     // UpdateRuleHash method was removed as LastHash property no longer exists
     // [Test]
-    // public void UpdateRuleHash_UpdatesHashAndSaves() - тест удален
+    // public void UpdateRuleHash_UpdatesHashAndSaves() - test removed
 
 
     [Test]

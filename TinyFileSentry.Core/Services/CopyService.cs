@@ -8,7 +8,7 @@ public class CopyService : ICopyService
     private readonly ILogService _logService;
     private readonly IPathSanitizer _pathSanitizer;
     private const long MaxFileSizeBytes = 10 * 1024 * 1024; // 10 MB
-    private const int MaxRetryAttempts = 10; // каждые 0.5 с = 5 секунд максимум
+    private const int MaxRetryAttempts = 10; // every 0.5s = 5 seconds maximum
     private const int RetryDelayMs = 500;
 
     public CopyService(IFileSystem fileSystem, ILogService logService, IPathSanitizer pathSanitizer)
